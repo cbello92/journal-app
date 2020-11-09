@@ -1,9 +1,8 @@
 import React from 'react'
+import { AppRouter } from './routers/AppRouter'
 
 export const JounalApp = () => {
     return (
-        <div>
-            <h1>JounalApp</h1>
-        </div>
+        <AppRouter />
     )
 }
