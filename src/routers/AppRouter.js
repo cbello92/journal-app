@@ -8,6 +8,7 @@ import { useDispatch } from 'react-redux';
 import { login } from '../actions/auth';
 import { PrivateRouter } from './PrivateRouter';
 import { PublicRouter } from './PublicRouter';
+import { startLoadingNotes } from '../actions/notes';
 
 
 export const AppRouter = () => {
@@ -17,10 +18,13 @@ export const AppRouter = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false)
 
     useEffect(() => {
-        firebase.auth().onAuthStateChanged((user) => {
+        firebase.auth().onAuthStateChanged(async (user) => {
             if (user?.uid) {
                 dispatch(login(user.uid, user.displayName));
                 setIsLoggedIn(true);
+
+                dispatch(startLoadingNotes(user.uid))
+
             } else {
                 setIsLoggedIn(false);
             }
@@ -30,7 +34,7 @@ export const AppRouter = () => {
 
     }, [dispatch, setChecking, setIsLoggedIn]);
 
-    if (checking) return (<h1>Espere...</h1>);
+    if (checking) return (<h1>Wait...</h1>);
 
     return (
         <Router>
