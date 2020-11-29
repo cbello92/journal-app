@@ -2,6 +2,7 @@ import { db } from "../firebase/firebase-config";
 import { loadNotes } from "../helpers/loadNotes";
 import { types } from "../types/types";
 import Swal from 'sweetalert2'
+import { fileUpload } from "../helpers/fileUpload";
 
 export const startNewNote = () => {
     return async (dispatch, getState) => {
@@ -15,9 +16,9 @@ export const startNewNote = () => {
 
         const document = await db.collection(`${uid}/journal/notes`).add(newNote);
 
-        console.log(document)
 
         dispatch(activeNote(document.id, newNote));
+        dispatch( addNewNote( document.id, newNote ) );
 
     }
 }
@@ -31,6 +32,14 @@ export const activeNote = (id, note) => {
         } 
     }
 }
+
+
+export const addNewNote = ( id, note ) => ({
+    type: types.notesAddNew,
+    payload: {
+        id, ...note
+    }
+})
 
 
 export const startLoadingNotes = (uid) => {
@@ -77,5 +86,51 @@ export const refreshNote = (id, note) => {
                 ...note
             }
         }
+    }
+}
+
+export const startUploading = (file) => {
+    return async (dispatch, getState) => {
+        const { active: note } = getState().notes;
+
+        Swal.fire({
+            title: 'Uploading...',
+            text: 'Please wait...',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            onBeforeOpen: () => {
+                Swal.showLoading()
+            }
+        });
+
+        const fileUrl = await fileUpload(file);
+        note.url = fileUrl;
+
+        dispatch(startSaveNote(note))
+
+        Swal.close();
+    }
+}
+
+export const startDeleting = (id) => {
+    return async (dispatch, getState) => {
+        const uid = getState().auth.uid;
+
+        await db.doc(`${uid}/journal/notes/${id}`).delete();
+
+        dispatch(deletNote(id));
+    }
+}
+
+export const deletNote = (id) => {
+    return {
+        type: types.noteDelete,
+        payload: id
+    }
+}
+
+export const notesCleanLogout = () => {
+    return {
+        type: types.noteLogoutCleaning
     }
 }

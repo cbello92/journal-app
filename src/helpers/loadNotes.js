@@ -6,16 +6,11 @@ export const loadNotes = async (uid) => {
     const notes = [];
 
     notesSnap.forEach((snapChildren) => {
-        console.log(snapChildren.data())
-
         notes.push({
             id: snapChildren.id,
             ...snapChildren.data()
         });
     });
-
-
-    console.log(notes)
 
     return notes;
 }
